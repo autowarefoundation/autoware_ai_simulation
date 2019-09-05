@@ -1,0 +1,24 @@
+<?xml version="1.0"?>
+<package format="2">
+  <name>wf_simulator</name>
+  <version>1.12.0</version>
+  <description>The wf_simulator package</description>
+  <maintainer email="horibe.takamasa@gmail.com">Takamasa HORIBE</maintainer>
+  <author email="horibe.takamasa@gmail.com">Takamasa HORIBE</author>
+
+  <license>Apache 2</license>
+
+  <buildtool_depend>autoware_build_flags</buildtool_depend>
+  <buildtool_depend>catkin</buildtool_depend>
+
+  <depend>autoware_health_checker</depend>
+  <depend>autoware_msgs</depend>
+  <depend>geometry_msgs</depend>
+  <depend>roscpp</depend>
+  <depend>rostest</depend>
+  <depend>rosunit</depend>
+  <depend>std_msgs</depend>
+  <depend>amathutils_lib</depend>
+  <depend>tf2</depend>
+  <depend>tf</depend>
+</package>
