@@ -38,7 +38,7 @@
 
 
   <!-- wf_simulator node -->
-  <node pkg="waypoint_follower" type="wf_simulator" name="wf_simulator" output="screen">
+  <node pkg="wf_simulator" type="wf_simulator" name="wf_simulator" output="screen">
     <param name="loop_rate" value="$(arg loop_rate)"/>
     <param name="lidar_height" value="$(arg lidar_height)"/>
     <param name="simulation_frame_id" value="$(arg simulation_frame_id)"/>
