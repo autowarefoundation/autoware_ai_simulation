@@ -91,6 +91,12 @@ private:
   double getSteer() override;
 
   /**
+   * @brief update vehicle states
+   * @param [in] dt delta time [s]
+   */
+  void update(const double& dt) override;
+
+  /**
    * @brief calculate derivative of states with ideal twist model
    * @param [in] state current model state
    * @param [in] input input vector to model
@@ -160,6 +166,12 @@ private:
    * @brief get vehicle steering angle
    */
   double getSteer() override;
+
+  /**
+   * @brief update vehicle states
+   * @param [in] dt delta time [s]
+   */
+  void update(const double& dt) override;
 
   /**
    * @brief calculate derivative of states with ideal steering model

@@ -48,6 +48,10 @@ double WFSimModelConstantAccelTwist::getSteer()
 {
   return 0.0;
 };
+void WFSimModelConstantAccelTwist::update(const double& dt)
+{
+  updateRungeKutta(dt, input_);
+}
 Eigen::VectorXd WFSimModelConstantAccelTwist::calcModel(const Eigen::VectorXd& state, const Eigen::VectorXd& input)
 {
   const double vel = state(IDX::VX);

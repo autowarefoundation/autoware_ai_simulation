@@ -72,7 +72,19 @@ double WFSimModelTimeDelayTwist::getSteer()
 {
   return 0.0;
 };
+void WFSimModelTimeDelayTwist::update(const double& dt)
+{
+  Eigen::VectorXd delayed_input = Eigen::VectorXd::Zero(dim_u_);
 
+  vx_input_queue_.push_back(input_(IDX_U::VX_DES));
+  delayed_input(IDX_U::VX_DES) = vx_input_queue_.front();
+  vx_input_queue_.pop_front();
+  wz_input_queue_.push_back(input_(IDX_U::WZ_DES));
+  delayed_input(IDX_U::WZ_DES) = wz_input_queue_.front();
+  wz_input_queue_.pop_front();
+
+  updateRungeKutta(dt, delayed_input);
+};
 void WFSimModelTimeDelayTwist::initializeInputQueue(const double& dt)
 {
   size_t vx_input_queue_size = static_cast<size_t>(round(vx_delay_ / dt));
@@ -89,16 +101,11 @@ void WFSimModelTimeDelayTwist::initializeInputQueue(const double& dt)
 
 Eigen::VectorXd WFSimModelTimeDelayTwist::calcModel(const Eigen::VectorXd& state, const Eigen::VectorXd& input)
 {
-  vx_input_queue_.push_back(input_(IDX_U::VX_DES));
-  const double delay_input_vx = vx_input_queue_.front();
-  vx_input_queue_.pop_front();
-  wz_input_queue_.push_back(input_(IDX_U::WZ_DES));
-  const double delay_input_wz = wz_input_queue_.front();
-  wz_input_queue_.pop_front();
-
   const double vx = state(IDX::VX);
   const double wz = state(IDX::WZ);
   const double yaw = state(IDX::YAW);
+  const double delay_input_vx = input(IDX_U::VX_DES);
+  const double delay_input_wz = input(IDX_U::WZ_DES);
   const double delay_vx_des = std::max(std::min(delay_input_vx, vx_lim_), -vx_lim_);
   const double delay_wz_des = std::max(std::min(delay_input_wz, wz_lim_), -wz_lim_);
   double vx_rate = -(vx - delay_vx_des) / vx_time_constant_;
@@ -173,7 +180,19 @@ double WFSimModelTimeDelaySteer::getSteer()
 {
   return state_(IDX::STEER);
 };
+void WFSimModelTimeDelaySteer::update(const double& dt)
+{
+  Eigen::VectorXd delayed_input = Eigen::VectorXd::Zero(dim_u_);
 
+  vx_input_queue_.push_back(input_(IDX_U::VX_DES));
+  delayed_input(IDX_U::VX_DES) = vx_input_queue_.front();
+  vx_input_queue_.pop_front();
+  steer_input_queue_.push_back(input_(IDX_U::STEER_DES));
+  delayed_input(IDX_U::STEER_DES) = steer_input_queue_.front();
+  steer_input_queue_.pop_front();
+
+  updateRungeKutta(dt, delayed_input);
+};
 void WFSimModelTimeDelaySteer::initializeInputQueue(const double& dt)
 {
   size_t vx_input_queue_size = static_cast<size_t>(round(vx_delay_ / dt));
@@ -190,16 +209,11 @@ void WFSimModelTimeDelaySteer::initializeInputQueue(const double& dt)
 
 Eigen::VectorXd WFSimModelTimeDelaySteer::calcModel(const Eigen::VectorXd& state, const Eigen::VectorXd& input)
 {
-  vx_input_queue_.push_back(input_(IDX_U::VX_DES));
-  const double delay_input_vel = vx_input_queue_.front();
-  vx_input_queue_.pop_front();
-  steer_input_queue_.push_back(input_(IDX_U::STEER_DES));
-  const double delay_input_steer = steer_input_queue_.front();
-  steer_input_queue_.pop_front();
-
   const double vel = state(IDX::VX);
   const double yaw = state(IDX::YAW);
   const double steer = state(IDX::STEER);
+  const double delay_input_vel = input(IDX_U::VX_DES);
+  const double delay_input_steer = input(IDX_U::STEER_DES);
   const double delay_vx_des = std::max(std::min(delay_input_vel, vx_lim_), -vx_lim_);
   const double delay_steer_des = std::max(std::min(delay_input_steer, steer_lim_), -steer_lim_);
   double vx_rate = -(vel - delay_vx_des) / vx_time_constant_;
