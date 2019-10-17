@@ -22,18 +22,18 @@ WFSimModelInterface::WFSimModelInterface(int dim_x, int dim_u) : dim_x_(dim_x), 
   input_ = Eigen::VectorXd::Zero(dim_u_);
 };
 
-void WFSimModelInterface::updateRungeKutta(const double& dt)
+void WFSimModelInterface::updateRungeKutta(const double& dt, const Eigen::VectorXd& input)
 {
-  Eigen::VectorXd k1 = calcModel(state_, input_);
-  Eigen::VectorXd k2 = calcModel(state_ + k1 * 0.5 * dt, input_);
-  Eigen::VectorXd k3 = calcModel(state_ + k2 * 0.5 * dt, input_);
-  Eigen::VectorXd k4 = calcModel(state_ + k3 * dt, input_);
+  Eigen::VectorXd k1 = calcModel(state_, input);
+  Eigen::VectorXd k2 = calcModel(state_ + k1 * 0.5 * dt, input);
+  Eigen::VectorXd k3 = calcModel(state_ + k2 * 0.5 * dt, input);
+  Eigen::VectorXd k4 = calcModel(state_ + k3 * dt, input);
 
   state_ += 1.0 / 6.0 * (k1 + 2.0 * k2 + 2.0 * k3 + k4) * dt;
 }
-void WFSimModelInterface::updateEuler(const double& dt)
+void WFSimModelInterface::updateEuler(const double& dt, const Eigen::VectorXd& input)
 {
-  state_ += calcModel(state_, input_) * dt;
+  state_ += calcModel(state_, input) * dt;
 }
 void WFSimModelInterface::getState(Eigen::VectorXd& state)
 {

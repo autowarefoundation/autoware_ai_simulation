@@ -217,7 +217,7 @@ void WFSimulator::timerCallbackSimulation(const ros::TimerEvent& e)
   *prev_update_time_ptr_ = ros::Time::now();
 
   /* update vehicle dynamics */
-  vehicle_model_ptr_->updateRungeKutta(dt);
+  vehicle_model_ptr_->update(dt);
 
   /* save current vehicle pose & twist */
   current_pose_.position.x = vehicle_model_ptr_->getX();

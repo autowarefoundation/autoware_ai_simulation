@@ -53,18 +53,18 @@
     <param name="sim_velocity_name" value="$(arg sim_velocity_name)"/>
     <param name="sim_vehicle_status_name" value="$(arg sim_vehicle_status_name)"/>
 
-    <param name="tread_length" value="(arg tread_length)"/>
-    <param name="angvel_lim" value="(arg angvel_lim)"/>
-    <param name="vel_lim" value="(arg vel_lim)"/>
-    <param name="steer_lim" value="(arg steer_lim)"/>
-    <param name="angvel_rate" value="(arg angvel_rate)"/>
-    <param name="steer_rate_lim" value="(arg steer_rate_lim)"/>
-    <param name="vel_time_delay" value="(arg vel_time_delay)"/>
-    <param name="vel_time_constant" value="(arg vel_time_constant)"/>
-    <param name="steer_time_delay" value="(arg steer_time_delay)"/>
-    <param name="steer_time_constant" value="(arg steer_time_constant)"/>
-    <param name="angvel_time_delay" value="(arg angvel_time_delay)"/>
-    <param name="angvel_time_constant" value="(arg angvel_time_constant)"/>
+    <param name="tread_length" value="$(arg tread_length)"/>
+    <param name="angvel_lim" value="$(arg angvel_lim)"/>
+    <param name="vel_lim" value="$(arg vel_lim)"/>
+    <param name="steer_lim" value="$(arg steer_lim)"/>
+    <param name="angvel_rate" value="$(arg angvel_rate)"/>
+    <param name="steer_rate_lim" value="$(arg steer_rate_lim)"/>
+    <param name="vel_time_delay" value="$(arg vel_time_delay)"/>
+    <param name="vel_time_constant" value="$(arg vel_time_constant)"/>
+    <param name="steer_time_delay" value="$(arg steer_time_delay)"/>
+    <param name="steer_time_constant" value="$(arg steer_time_constant)"/>
+    <param name="angvel_time_delay" value="$(arg angvel_time_delay)"/>
+    <param name="angvel_time_constant" value="$(arg angvel_time_constant)"/>
 
     <param name="vehicle_model_type" value="$(arg vehicle_model_type)"/>
     <param name="pos_noise_stddev" value="$(arg pos_noise_stddev)"/>

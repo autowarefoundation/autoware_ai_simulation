@@ -79,14 +79,22 @@ public:
   /**
    * @brief update vehicle states with Runge-Kutta methods
    * @param [in] dt delta time [s]
+   * @param [in] input vehicle input
    */
-  void updateRungeKutta(const double& dt);
+  void updateRungeKutta(const double& dt, const Eigen::VectorXd& input);
 
   /**
    * @brief update vehicle states with Euler methods
    * @param [in] dt delta time [s]
+   * @param [in] input vehicle input
    */
-  void updateEuler(const double& dt);
+  void updateEuler(const double& dt, const Eigen::VectorXd& input);
+
+  /**
+   * @brief update vehicle states
+   * @param [in] dt delta time [s]
+   */
+  virtual void update(const double& dt) = 0;
 
   /**
    * @brief get vehicle position x
