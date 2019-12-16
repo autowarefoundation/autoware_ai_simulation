@@ -4,28 +4,18 @@ project(vehicle_gazebo_simulation_interface)
 add_compile_options(-std=c++11)
 
 find_package(catkin REQUIRED
+  autoware_build_flags
+  autoware_msgs
+  gazebo_msgs
   geometry_msgs
   roscpp
   sensor_msgs
   std_msgs
-  gazebo_msgs
-  autoware_msgs
-  tf2_ros
   tf2
-  autoware_build_flags
+  tf2_ros
 )
 
-catkin_package(
-  CATKIN_DEPENDS
-    geometry_msgs
-    roscpp
-    sensor_msgs
-    std_msgs
-    gazebo_msgs
-    autoware_msgs
-    tf2_ros
-    tf2
-)
+catkin_package()
 
 include_directories(
  ${catkin_INCLUDE_DIRS}

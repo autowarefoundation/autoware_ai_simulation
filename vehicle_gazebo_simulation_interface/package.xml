@@ -9,12 +9,12 @@
   <buildtool_depend>autoware_build_flags</buildtool_depend>
   <buildtool_depend>catkin</buildtool_depend>
 
+  <depend>autoware_msgs</depend>
+  <depend>gazebo_msgs</depend>
   <depend>geometry_msgs</depend>
   <depend>roscpp</depend>
   <depend>sensor_msgs</depend>
   <depend>std_msgs</depend>
-  <depend>gazebo_msgs</depend>
-  <depend>autoware_msgs</depend>
-  <depend>tf2_ros</depend>
   <depend>tf2</depend>
+  <depend>tf2_ros</depend>
 </package>

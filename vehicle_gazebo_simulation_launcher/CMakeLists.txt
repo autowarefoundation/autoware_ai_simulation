@@ -7,14 +7,11 @@ find_package(catkin REQUIRED
   joint_state_controller
 )
 
-catkin_package(
-  CATKIN_DEPENDS
-    controller_manager
-    robot_state_publisher
-    joint_state_controller
-)
+catkin_package()
 install(DIRECTORY launch
-  DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION})
+  DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
+)
 install(DIRECTORY scripts
   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
-  USE_SOURCE_PERMISSIONS)
+  USE_SOURCE_PERMISSIONS
+)
