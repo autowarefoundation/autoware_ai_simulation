@@ -11,7 +11,6 @@
   <depend>autoware_msgs</depend>
   <depend>geometry_msgs</depend>
   <depend>rosbridge_server</depend>
-  <depend>roscpp</depend>
   <depend>roslib</depend>
   <depend>rospy</depend>
   <depend>rqt_gui</depend>
