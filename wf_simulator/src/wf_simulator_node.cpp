@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-#include "wf_simulator/wf_simulator_core.hpp"
+#include "wf_simulator/wf_simulator_core.h"
 
 int main(int argc, char** argv)
 {
   ros::init(argc, argv, "wf_simulator");
-  WFSimulator obj;
+  WFSimulatorCore obj;
   ros::spin();
   return 0;
 };

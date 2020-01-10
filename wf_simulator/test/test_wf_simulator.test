@@ -1,5 +1,10 @@
 <launch>
-
-  <test test-name="test-wf_simulator" pkg="wf_simulator" type="test-wf_simulator" name="test" time-limit="300.0"/>
-
+  <test test-name="test_wf_simulator_init_rviz" name="test_wf_simulator_init_rviz"
+    pkg="wf_simulator" type="test-wf_simulator">
+    <param name="initialize_source" value="RVIZ"/>
+  </test>
+  <test test-name="test_wf_simulator_init_ndt" name="test_wf_simulator_init_ndt"
+    pkg="wf_simulator" type="test-wf_simulator">
+    <param name="initialize_source" value="NDT"/>
+  </test>
 </launch>
