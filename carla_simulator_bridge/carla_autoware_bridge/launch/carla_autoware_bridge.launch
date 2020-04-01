@@ -2,7 +2,7 @@
 <launch>
   <arg name='host' default='localhost'/>
   <arg name='port' default='2000'/>
-  <arg name='town' default=''/>
+  <arg name='town' default='Town01'/>
   <arg name="vehicle_filter" default='vehicle.toyota.prius*' />
   <arg name="sensor_definition_file" default='$(find carla_autoware_bridge)/config/sensors.json'/>
   <arg name='role_name' default='ego_vehicle'/>
@@ -43,7 +43,9 @@
     # Map loading                #
     ##############################
   -->
-  <include file="$(find carla_points_map_loader)/launch/carla_points_map_loader.launch"/>
+  <include file="$(find map_file)/launch/points_map_loader.launch">
+    <arg name="path_pcd" value='$(env CARLA_MAPS_PATH)/$(arg town).pcd'/>
+  </include>
 
   <!--
     ##############################

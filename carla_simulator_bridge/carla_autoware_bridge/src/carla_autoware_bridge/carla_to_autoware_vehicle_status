@@ -11,7 +11,7 @@ import math
 import rospy
 from carla_msgs.msg import CarlaEgoVehicleInfo
 from carla_msgs.msg import CarlaEgoVehicleStatus
-from autoware_msgs.msg import VehicleStatus
+from autoware_msgs.msg import VehicleStatus, Gear
 
 pub = rospy.Publisher('vehicle_status', VehicleStatus, queue_size=1)
 vehicle_info = None
@@ -46,7 +46,12 @@ def vehicle_status_callback(data):
 
     status.angle = data.control.steer * math.degrees(max_steering_angle)
     status.speed = data.velocity * 3.6  # speed is expected in km/h
-    status.gearshift = data.control.gear
+    
+    if data.control.reverse:
+        status.current_gear.gear = Gear.REVERSE
+    else:
+        status.current_gear.gear = Gear.DRIVE
+
     if data.control.manual_gear_shift:
         status.drivemode = VehicleStatus.MODE_MANUAL
     else:
