@@ -23,7 +23,7 @@ Integration of the CARLA simulator
     sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 304F9BC29914A77D &&
     sudo add-apt-repository "deb [arch=amd64 trusted=yes] http://dist.carla.org/carla-0.9.8/ all main"
 
-    sudo apt install carla
+    sudo apt install carla-simulator
 
 #### Point cloud maps of CARLA towns
 
