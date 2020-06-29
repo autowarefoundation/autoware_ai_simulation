@@ -7,17 +7,27 @@
 """
 convert detected objects to autoware
 """
+import carla
+
 import rospy
+import tf
+
 from autoware_msgs.msg import DetectedObjectArray, DetectedObject
 from derived_object_msgs.msg import ObjectArray
+from geometry_msgs.msg import Point32
+from visualization_msgs.msg import Marker, MarkerArray
 
-pub = rospy.Publisher('/tracked_objects', DetectedObjectArray, queue_size=1)
+from scipy.spatial.transform import Rotation as R
 
+pub = rospy.Publisher('/ground_truth/objects', DetectedObjectArray, queue_size=1)
+pub_markers = rospy.Publisher('/ground_truth/objects_markers', MarkerArray, queue_size=1)
 
 def callback(data):
     """
     callback for current objects
     """
+    markers_msg = MarkerArray()
+
     objects_msg = DetectedObjectArray()
     objects_msg.header = data.header
     for obj in data.objects:
@@ -26,30 +36,96 @@ def callback(data):
         object_msg.id = obj.id
         object_msg.score = 1
         object_msg.valid = True
-        object_msg.space_frame = "map"
+        object_msg.space_frame = 'map'
         object_msg.pose = obj.pose
         object_msg.dimensions.x = obj.shape.dimensions[0]
         object_msg.dimensions.y = obj.shape.dimensions[1]
         object_msg.dimensions.z = obj.shape.dimensions[2]
         object_msg.velocity = obj.twist
         object_msg.acceleration = obj.accel
-        object_msg.convex_hull.polygon = obj.polygon
         object_msg.pose_reliable = True
         object_msg.velocity_reliable = True
         object_msg.acceleration_reliable = True
+        
+        # Create convex hull
+        location = carla.Location(obj.pose.position.x, obj.pose.position.y, obj.pose.position.z)
+        extent = carla.Vector3D(
+            obj.shape.dimensions[0] / 2.0,
+            obj.shape.dimensions[1] / 2.0,
+            obj.shape.dimensions[2] / 2.0
+        )
+        
+        local_vertices = [
+            location + carla.Location(-extent.x,-extent.y,-extent.z),
+            location + carla.Location(-extent.x,-extent.y, extent.z),
+            location + carla.Location(-extent.x, extent.y,-extent.z),
+            location + carla.Location(-extent.x, extent.y, extent.z),
+            location + carla.Location( extent.x,-extent.y,-extent.z),
+            location + carla.Location( extent.x,-extent.y, extent.z),
+            location + carla.Location( extent.x, extent.y,-extent.z),
+            location + carla.Location( extent.x, extent.y, extent.z)
+        ]
+
+        quat = obj.pose.orientation
+        rotation_matrix = R.from_quat([quat.x, quat.y, quat.z, quat.w])
+        world_vertices = []
+        for local_vertex in local_vertices:
+            x, y, z = local_vertex.x, local_vertex.y, local_vertex.z
+            
+            # Apply rotation.
+            world_vertex = rotation_matrix.apply([x, y, z])
+
+            # Apply translation.
+            world_vertex[0] = obj.pose.position.x
+            world_vertex[1] = obj.pose.position.y
+            world_vertex[2] = obj.pose.position.z
+
+            world_vertices.append(carla.Location(
+                world_vertex[0], world_vertex[1], world_vertex[2]    
+            ))
+
+        for vertex in world_vertices:
+            point = Point32()
+            point.x = vertex.x
+            point.y = vertex.y
+            point.z = vertex.z
+
+            object_msg.convex_hull.polygon.points.append(point)
 
         objects_msg.objects.append(object_msg)
+    
+        # Create marker.
+        marker_pose = rotation_matrix.apply([0, 0, obj.shape.dimensions[2] / 2.0])
+
+        marker = Marker()
+        marker.header = obj.header
+        marker.id = obj.id
+        marker.type = Marker.CUBE
+        marker.action = Marker.ADD
+        marker.pose.position.x = marker_pose[0] + obj.pose.position.x 
+        marker.pose.position.y = marker_pose[1] + obj.pose.position.y
+        marker.pose.position.z = marker_pose[2] + obj.pose.position.z
+        marker.pose.orientation = obj.pose.orientation
+        marker.scale.x = obj.shape.dimensions[0]
+        marker.scale.y = obj.shape.dimensions[1]
+        marker.scale.z = obj.shape.dimensions[2]
+        marker.color.a = 0.5
+        marker.color.r = 1.0
+        marker.color.g = 0.0
+        marker.color.b = 0.0
+        markers_msg.markers.append(marker)
+        
     if not rospy.is_shutdown():
         pub.publish(objects_msg)
-
+        pub_markers.publish(markers_msg)
 
 def convert_objects():
     """
     main loop
     """
-    rospy.init_node('convert_objects', anonymous=True)
-    role_name = rospy.get_param("/role_name", "ego_vehicle")
-    rospy.Subscriber("/carla/{}/objects".format(role_name), ObjectArray, callback)
+    rospy.init_node('carla_to_autoware_detected_objects', anonymous=True)
+    role_name = rospy.get_param('/role_name', 'ego_vehicle')
+    rospy.Subscriber('/carla/{}/objects'.format(role_name), ObjectArray, callback)
     rospy.spin()
 
 

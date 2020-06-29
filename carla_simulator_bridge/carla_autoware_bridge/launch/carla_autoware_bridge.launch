@@ -1,59 +1,56 @@
-<!-- -->
 <launch>
-  <arg name='host' default='localhost'/>
-  <arg name='port' default='2000'/>
-  <arg name='town' default='Town01'/>
-  <arg name="vehicle_filter" default='vehicle.toyota.prius*' />
-  <arg name="sensor_definition_file" default='$(find carla_autoware_bridge)/config/sensors.json'/>
-  <arg name='role_name' default='ego_vehicle'/>
-  <!-- use comma separated format "x,y,z,roll,pitch,yaw" -->
-  <arg name='spawn_point' default=''/>
+  <arg name='host'/>
+  <arg name='port'/>
+  <arg name='town'/>
+  <arg name='vehicle_filter'/>
+  <arg name='role_name'/>
+  <arg name='spawn_point'/>
+  <arg name='sensor_definition_file'/>
+  <arg name='use_manual_control'/>
 
-  <!--
-    #################
-    # CARLA Clients #
-    #################
-  -->
-  <!-- ros-bridge -->
-  <include file="$(find carla_ros_bridge)/launch/carla_ros_bridge.launch">
+  <!-- carla autoware bridge -->
+  <include file='$(find carla_ros_bridge)/launch/carla_ros_bridge.launch'>
     <arg name='host' value='$(arg host)'/>
     <arg name='port' value='$(arg port)'/>
     <arg name='town' value='$(arg town)'/>
   </include>
 
   <!-- carla autoware ego vehicle -->
-  <include file="$(find carla_ego_vehicle)/launch/carla_ego_vehicle.launch" >
+  <include file='$(find carla_ego_vehicle)/launch/carla_ego_vehicle.launch' >
     <arg name='host' value='$(arg host)'/>
     <arg name='port' value='$(arg port)'/>
     <arg name='vehicle_filter' value='$(arg vehicle_filter)'/>
-    <arg name="sensor_definition_file" value='$(arg sensor_definition_file)'/>
     <arg name='role_name' value='$(arg role_name)'/>
     <arg name='spawn_point' value='$(arg spawn_point)'/>
+    <arg name='sensor_definition_file' value='$(arg sensor_definition_file)'/>
   </include>
 
-  <!-- mission planning -->
-  <include file="$(find carla_waypoint_publisher)/launch/carla_waypoint_publisher.launch" >
-    <arg name='host' value='$(arg host)'/>
-    <arg name='port' value='$(arg port)'/>
-    <arg name="role_name" value='$(arg role_name)'/>
-  </include>
+  <group if='$(arg use_manual_control)'>
+    <!-- carla manual control -->
+    <include file='$(find carla_manual_control)/launch/carla_manual_control.launch'>
+      <arg name='role_name' value='$(arg role_name)'/>
+    </include>
+  </group>
 
-  <!--
-    ##############################
-    # Map loading                #
-    ##############################
-  -->
-  <include file="$(find map_file)/launch/points_map_loader.launch">
-    <arg name="path_pcd" value='$(env CARLA_MAPS_PATH)/$(arg town).pcd'/>
-  </include>
+  <group unless='$(arg use_manual_control)'>
 
-  <!--
-    ##############################
-    # ROS remapping + conversion #
-    ##############################
-  -->
-  <include file="$(find carla_autoware_bridge)/launch/carla_autoware_bridge_common.launch">
-    <arg name="role_name" value='$(arg role_name)'/>
-  </include>
+    <!-- carla ackermann control -->
+    <include file='$(find carla_ackermann_control)/launch/carla_ackermann_control.launch'>
+      <arg name='role_name' value='$(arg role_name)'/>
+    </include>
+
+    <!-- tune carla ackermann controller parameters -->
+    <node name='$(anon dynparam)' pkg='dynamic_reconfigure' type='dynparam' args='set_from_parameters carla/ego_vehicle/ackermann_control'>
+      <param name='speed_Kp' type='double' value='0.15' />
+      <param name='speed_Ki' type='double' value='0.0' />
+      <param name='speed_Kd' type='double' value='0.4' />
+
+      <param name='accel_Kp' type='double' value='0.03' />
+      <param name='accel_Ki' type='double' value='0.0' />
+      <param name='accel_Kd' type='double' value='0.05' />
+    </node>
+
+  </group>
+
 </launch>
 
