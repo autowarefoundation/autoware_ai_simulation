@@ -44,7 +44,6 @@ def callback(data):
     twist = TwistStamped()
     twist.header = data.header
     twist.twist.linear.x = math.sqrt(linear.x**2 + linear.y**2 + linear.z**2)
-    # TODO: Compute correclty angular twist
     twist.twist.angular = angular
 
     pose_pub.publish(pose)

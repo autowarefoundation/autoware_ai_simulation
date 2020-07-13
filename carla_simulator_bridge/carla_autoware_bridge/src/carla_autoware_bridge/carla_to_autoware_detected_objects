@@ -1,23 +1,23 @@
 #!/usr/bin/env python
 #
-# Copyright (c) 2019 Intel Corporation
+# Copyright (c) 2020 Intel Corporation
 #
 # This work is licensed under the terms of the MIT license.
 # For a copy, see <https://opensource.org/licenses/MIT>.
 """
-convert detected objects to autoware
+ground truth detections. Publishes the following topics:
+    /ground_truth/objects         (autoware_msgs::DetectedObjectArray)
+    /ground_truth/objects_markers (visualization_msgs::MarkerArray)
 """
 import carla
+import numpy
 
 import rospy
 import tf
 
 from autoware_msgs.msg import DetectedObjectArray, DetectedObject
 from derived_object_msgs.msg import ObjectArray
-from geometry_msgs.msg import Point32
 from visualization_msgs.msg import Marker, MarkerArray
-
-from scipy.spatial.transform import Rotation as R
 
 pub = rospy.Publisher('/ground_truth/objects', DetectedObjectArray, queue_size=1)
 pub_markers = rospy.Publisher('/ground_truth/objects_markers', MarkerArray, queue_size=1)
@@ -43,68 +43,32 @@ def callback(data):
         object_msg.dimensions.z = obj.shape.dimensions[2]
         object_msg.velocity = obj.twist
         object_msg.acceleration = obj.accel
+        object_msg.convex_hull.polygon = obj.polygon
         object_msg.pose_reliable = True
         object_msg.velocity_reliable = True
         object_msg.acceleration_reliable = True
         
-        # Create convex hull
-        location = carla.Location(obj.pose.position.x, obj.pose.position.y, obj.pose.position.z)
-        extent = carla.Vector3D(
-            obj.shape.dimensions[0] / 2.0,
-            obj.shape.dimensions[1] / 2.0,
-            obj.shape.dimensions[2] / 2.0
-        )
-        
-        local_vertices = [
-            location + carla.Location(-extent.x,-extent.y,-extent.z),
-            location + carla.Location(-extent.x,-extent.y, extent.z),
-            location + carla.Location(-extent.x, extent.y,-extent.z),
-            location + carla.Location(-extent.x, extent.y, extent.z),
-            location + carla.Location( extent.x,-extent.y,-extent.z),
-            location + carla.Location( extent.x,-extent.y, extent.z),
-            location + carla.Location( extent.x, extent.y,-extent.z),
-            location + carla.Location( extent.x, extent.y, extent.z)
-        ]
-
-        quat = obj.pose.orientation
-        rotation_matrix = R.from_quat([quat.x, quat.y, quat.z, quat.w])
-        world_vertices = []
-        for local_vertex in local_vertices:
-            x, y, z = local_vertex.x, local_vertex.y, local_vertex.z
-            
-            # Apply rotation.
-            world_vertex = rotation_matrix.apply([x, y, z])
-
-            # Apply translation.
-            world_vertex[0] = obj.pose.position.x
-            world_vertex[1] = obj.pose.position.y
-            world_vertex[2] = obj.pose.position.z
-
-            world_vertices.append(carla.Location(
-                world_vertex[0], world_vertex[1], world_vertex[2]    
-            ))
-
-        for vertex in world_vertices:
-            point = Point32()
-            point.x = vertex.x
-            point.y = vertex.y
-            point.z = vertex.z
-
-            object_msg.convex_hull.polygon.points.append(point)
-
         objects_msg.objects.append(object_msg)
     
         # Create marker.
-        marker_pose = rotation_matrix.apply([0, 0, obj.shape.dimensions[2] / 2.0])
+        quat = obj.pose.orientation
+        euler = tf.transformations.euler_from_quaternion((quat.x, quat.y, quat.z, quat.w))
+        transform = carla.Transform(
+            carla.Location(obj.pose.position.x, obj.pose.position.y, obj.pose.position.z),
+            carla.Rotation(euler[1], euler[2], euler[0])
+        ) 
+        transformation_matrix = numpy.array(transform.get_matrix())
+        offset = numpy.array([[0, 0, obj.shape.dimensions[2] / 2.0, 1]]).T
+        marker_position = numpy.matmul(transformation_matrix, offset)
 
         marker = Marker()
         marker.header = obj.header
         marker.id = obj.id
         marker.type = Marker.CUBE
         marker.action = Marker.ADD
-        marker.pose.position.x = marker_pose[0] + obj.pose.position.x 
-        marker.pose.position.y = marker_pose[1] + obj.pose.position.y
-        marker.pose.position.z = marker_pose[2] + obj.pose.position.z
+        marker.pose.position.x = marker_position[0]
+        marker.pose.position.y = marker_position[1]
+        marker.pose.position.z = marker_position[2]
         marker.pose.orientation = obj.pose.orientation
         marker.scale.x = obj.shape.dimensions[0]
         marker.scale.y = obj.shape.dimensions[1]

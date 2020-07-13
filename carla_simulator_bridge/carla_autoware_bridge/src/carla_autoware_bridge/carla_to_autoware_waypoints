@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 #
-# Copyright (c) 2019 Intel Corporation
+# Copyright (c) 2020 Intel Corporation
 #
 # This work is licensed under the terms of the MIT license.
 # For a copy, see <https://opensource.org/licenses/MIT>.
@@ -38,8 +38,7 @@ def convert_waypoints_carla_to_autoware():
     """
     rospy.init_node('carla_to_autoware_waypoints', anonymous=True)
     role_name = rospy.get_param('/role_name', 'ego_vehicle')
-    rospy.Subscriber('/carla/{}/waypoints'.format(role_name),
-                     Path, path_callback)
+    rospy.Subscriber('/carla/{}/waypoints'.format(role_name), Path, path_callback)
     rospy.spin()
 
 
