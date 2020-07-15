@@ -20,7 +20,6 @@ def callback(data):
     """
     pose = PoseStamped()
     pose.header = data.header
-    #pose.header.frame_id = "map";
     pose.pose = data.pose.pose
     pub.publish(pose)
 

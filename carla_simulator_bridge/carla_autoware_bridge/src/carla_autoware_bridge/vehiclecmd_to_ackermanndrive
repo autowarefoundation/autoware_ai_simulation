@@ -33,9 +33,11 @@ def callback(data):
     """
     msg = AckermannDrive()
     msg.speed = data.twist_cmd.twist.linear.x
-    msg.steering_angle = convert_trans_rot_vel_to_steering_angle(
-        msg.speed, data.twist_cmd.twist.angular.z, wheelbase)
+    msg.steering_angle = convert_trans_rot_vel_to_steering_angle(msg.speed,
+                                                                 data.twist_cmd.twist.angular.z,
+                                                                 wheelbase)
     pub.publish(msg)
+
 
 def twist_to_ackermanndrive():
     """
@@ -44,7 +46,7 @@ def twist_to_ackermanndrive():
     global pub, wheelbase
     rospy.init_node('twist_to_ackermanndrive')
     wheelbase = rospy.get_param('~wheelbase', 2.7)
-    role_name = rospy.get_param('/role_name','ego_vehicle')
+    role_name = rospy.get_param('/role_name', 'ego_vehicle')
     pub = rospy.Publisher('/carla/{}/ackermann_cmd'.format(role_name), AckermannDrive, queue_size=1)
     rospy.Subscriber('/vehicle_cmd', VehicleCmd, callback, queue_size=1)
     rospy.spin()

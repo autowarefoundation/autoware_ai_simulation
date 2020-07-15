@@ -6,12 +6,8 @@
 # For a copy, see <https://opensource.org/licenses/MIT>.
 """
 ground truth detections. Publishes the following topics:
-    /ground_truth/objects         (autoware_msgs::DetectedObjectArray)
-    /ground_truth/objects_markers (visualization_msgs::MarkerArray)
+    /ground_truth/objects  (autoware_msgs::DetectedObjectArray)
 """
-import carla
-import numpy
-
 import rospy
 import tf
 
@@ -20,14 +16,12 @@ from derived_object_msgs.msg import ObjectArray
 from visualization_msgs.msg import Marker, MarkerArray
 
 pub = rospy.Publisher('/ground_truth/objects', DetectedObjectArray, queue_size=1)
-pub_markers = rospy.Publisher('/ground_truth/objects_markers', MarkerArray, queue_size=1)
+
 
 def callback(data):
     """
     callback for current objects
     """
-    markers_msg = MarkerArray()
-
     objects_msg = DetectedObjectArray()
     objects_msg.header = data.header
     for obj in data.objects:
@@ -47,41 +41,12 @@ def callback(data):
         object_msg.pose_reliable = True
         object_msg.velocity_reliable = True
         object_msg.acceleration_reliable = True
-        
-        objects_msg.objects.append(object_msg)
-    
-        # Create marker.
-        quat = obj.pose.orientation
-        euler = tf.transformations.euler_from_quaternion((quat.x, quat.y, quat.z, quat.w))
-        transform = carla.Transform(
-            carla.Location(obj.pose.position.x, obj.pose.position.y, obj.pose.position.z),
-            carla.Rotation(euler[1], euler[2], euler[0])
-        ) 
-        transformation_matrix = numpy.array(transform.get_matrix())
-        offset = numpy.array([[0, 0, obj.shape.dimensions[2] / 2.0, 1]]).T
-        marker_position = numpy.matmul(transformation_matrix, offset)
 
-        marker = Marker()
-        marker.header = obj.header
-        marker.id = obj.id
-        marker.type = Marker.CUBE
-        marker.action = Marker.ADD
-        marker.pose.position.x = marker_position[0]
-        marker.pose.position.y = marker_position[1]
-        marker.pose.position.z = marker_position[2]
-        marker.pose.orientation = obj.pose.orientation
-        marker.scale.x = obj.shape.dimensions[0]
-        marker.scale.y = obj.shape.dimensions[1]
-        marker.scale.z = obj.shape.dimensions[2]
-        marker.color.a = 0.5
-        marker.color.r = 1.0
-        marker.color.g = 0.0
-        marker.color.b = 0.0
-        markers_msg.markers.append(marker)
-        
+        objects_msg.objects.append(object_msg)
+
     if not rospy.is_shutdown():
         pub.publish(objects_msg)
-        pub_markers.publish(markers_msg)
+
 
 def convert_objects():
     """
