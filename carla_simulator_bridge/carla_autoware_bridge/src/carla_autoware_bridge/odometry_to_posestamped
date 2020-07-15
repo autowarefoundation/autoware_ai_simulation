@@ -20,7 +20,6 @@ def callback(data):
     """
     pose = PoseStamped()
     pose.header = data.header
-    #pose.header.frame_id = "map";
     pose.pose = data.pose.pose
     pub.publish(pose)
 
@@ -30,8 +29,8 @@ def convert_odometry_to_pose():
     main loop
     """
     rospy.init_node('convert_odometry_to_pose', anonymous=True)
-    role_name = rospy.get_param("/role_name", "ego_vehicle")
-    rospy.Subscriber("/carla/{}/odometry".format(role_name), Odometry, callback)
+    role_name = rospy.get_param('/role_name', 'ego_vehicle')
+    rospy.Subscriber('/carla/{}/odometry'.format(role_name), Odometry, callback)
     rospy.spin()
 
 

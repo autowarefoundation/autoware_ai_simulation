@@ -16,14 +16,11 @@ catkin_install_python(PROGRAMS
     src/carla_autoware_bridge/odometry_to_posestamped
     src/carla_autoware_bridge/vehiclecmd_to_ackermanndrive
     src/carla_autoware_bridge/carla_to_autoware_detected_objects
+    src/carla_autoware_bridge/carla_to_autoware_localization
     DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
 
 install(DIRECTORY launch/
         DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/launch
-)
-
-install(DIRECTORY config/
-        DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/config
 )
 

@@ -1,17 +1,21 @@
 #!/usr/bin/env python
 #
-# Copyright (c) 2019 Intel Corporation
+# Copyright (c) 2020 Intel Corporation
 #
 # This work is licensed under the terms of the MIT license.
 # For a copy, see <https://opensource.org/licenses/MIT>.
 """
-convert detected objects to autoware
+ground truth detections. Publishes the following topics:
+    /ground_truth/objects  (autoware_msgs::DetectedObjectArray)
 """
 import rospy
+import tf
+
 from autoware_msgs.msg import DetectedObjectArray, DetectedObject
 from derived_object_msgs.msg import ObjectArray
+from visualization_msgs.msg import Marker, MarkerArray
 
-pub = rospy.Publisher('/tracked_objects', DetectedObjectArray, queue_size=1)
+pub = rospy.Publisher('/ground_truth/objects', DetectedObjectArray, queue_size=1)
 
 
 def callback(data):
@@ -26,7 +30,7 @@ def callback(data):
         object_msg.id = obj.id
         object_msg.score = 1
         object_msg.valid = True
-        object_msg.space_frame = "map"
+        object_msg.space_frame = 'map'
         object_msg.pose = obj.pose
         object_msg.dimensions.x = obj.shape.dimensions[0]
         object_msg.dimensions.y = obj.shape.dimensions[1]
@@ -39,6 +43,7 @@ def callback(data):
         object_msg.acceleration_reliable = True
 
         objects_msg.objects.append(object_msg)
+
     if not rospy.is_shutdown():
         pub.publish(objects_msg)
 
@@ -47,9 +52,9 @@ def convert_objects():
     """
     main loop
     """
-    rospy.init_node('convert_objects', anonymous=True)
-    role_name = rospy.get_param("/role_name", "ego_vehicle")
-    rospy.Subscriber("/carla/{}/objects".format(role_name), ObjectArray, callback)
+    rospy.init_node('carla_to_autoware_detected_objects', anonymous=True)
+    role_name = rospy.get_param('/role_name', 'ego_vehicle')
+    rospy.Subscriber('/carla/{}/objects'.format(role_name), ObjectArray, callback)
     rospy.spin()
 
 
